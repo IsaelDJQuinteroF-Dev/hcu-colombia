@@ -1,5 +1,5 @@
-# hcu-colombia
-Proyecto de reglamentación de la Historia Clínica Única en Colombia
+🏥 HCU Colombia — Historia Clínica Única
+
 Repositorio de autoría intelectual y evidencia del proyecto de reglamentación
 Creado el 29 de abril de 2026 por Isael Quintero — Barranquilla, Atlántico, Colombia.
 Contacto: disponible bajo solicitud formal.
@@ -20,31 +20,30 @@ La propuesta en cinco pilares
 Estructura del repositorio
 hcu-colombia/
 │
-├── README.md                          ← Este archivo
+├── README.md
+├── LICENSE.md
 │
 ├── 01_marco_legal/
-│   ├── analisis_vacios_ley2015.md     ← Por qué la ley actual es insuficiente
+│   ├── analisis_vacios_ley2015.md
 │   └── referencias_normativas.md
 │
 ├── 02_propuesta/
-│   ├── proyecto_reglamentacion.md     ← Documento técnico completo ⭐
-│   ├── arquitectura_tecnica.md        ← Modelo federado + HL7 FHIR
-│   └── cronograma_dos_anos.md         ← Fases, hitos y sanciones
+│   └── proyecto_reglamentacion.md
 │
 ├── 03_comunicaciones/
-│   ├── borradores_congresistas.md     ← Mensajes personalizados por perfil político
+│   ├── borradores_congresistas.md
 │   ├── borradores_presidenciables.md
-│   └── registro_contactos.md          ← Log de quién, cuándo, qué respuesta
+│   └── registro_contactos.md
 │
 ├── 04_piloto_atlantico/
-│   └── propuesta_piloto_regional.md   ← Alianza Gobernación/Alcaldía Barranquilla
+│   └── propuesta_piloto_regional.md
 │
 └── 05_referencias/
     ├── estandar_hl7_fhir.md
     └── experiencias_internacionales.md
 
 Estado actual del proyecto
-ActividadEstadoPropuesta técnica y política✅ Borrador completoBorradores para congresistas (6)✅ ListosBorradores para presidenciables (2)✅ ListosContacto inicial — Abelardo de la Espriella✅ Enviado (abril 2025)Contacto congresistas restantes🔄 En procesoPropuesta piloto regional Atlántico📋 Por desarrollarDocumento ejecutivo (1 página)📋 Por desarrollar
+ActividadEstadoPropuesta técnica y política✅ Borrador completoBorradores para congresistas (6)✅ ListosBorradores para presidenciables (2)✅ ListosContacto inicial — Abelardo de la Espriella✅ Enviado (abril 2026)Contacto congresistas restantes🔄 En procesoPropuesta piloto regional Atlántico📋 En desarrolloDocumento ejecutivo (1 página)📋 Por desarrollar
 
 Aviso de autoría
 Este repositorio constituye registro de la autoría intelectual de la propuesta aquí contenida.
