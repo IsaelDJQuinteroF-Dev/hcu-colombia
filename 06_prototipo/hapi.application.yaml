@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://db:5432/hapi_fhir'
+    username: admin
+    password: admin123
+    driverClassName: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      hibernate.search.enabled: false
+
+hapi:
+  fhir:
+    # Versión FHIR que soporta el servidor
+    fhir_version: R4
+    # Habilita el entorno de pruebas (sandbox)
+    tester:
+      home:
+        name: HCU Colombia — Prototipo de Historia Clínica Única
+        server_address: http://localhost:8080/fhir
+        refuse_to_fetch_third_party_urls: false
+        fhir_version: R4
+    # Política de seguridad (abierta para desarrollo)
+    cors:
+      allow_credentials: true
+      allowed_origin:
+        - '*'
+    # Manejo de recursos
+    allow_external_references: true
+    allow_multiple_delete: true
+    allow_contains_searches: true
+    # Suscripciones (para notificaciones en tiempo real)
+    subscription:
+      email:
+        from: no-reply@hcu-colombia.local
+        host: localhost
+    # Base de datos
+    search:
+      date_interval_threshold: 525600  # 1 año en minutos

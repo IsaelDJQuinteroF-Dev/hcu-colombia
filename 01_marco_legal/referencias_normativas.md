@@ -84,6 +84,6 @@
 
 \---
 
-*Ver análisis de vacíos en: `analisis\\\_vacios\\\_ley2015.md`*  
-*Ver propuesta completa en: `../02\\\_propuesta/proyecto\\\_reglamentacion.md`*
+*Ver análisis de vacíos en: `analisis\\\\\\\_vacios\\\\\\\_ley2015.md`*  
+*Ver propuesta completa en: `../02\\\\\\\_propuesta/proyecto\\\\\\\_reglamentacion.md`*
 

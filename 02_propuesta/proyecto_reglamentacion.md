@@ -2,16 +2,16 @@
 
 ### Propuesta para complementar y acelerar la Ley 2015 de 2020
 
-**Autor:** Isael Quintero  
+**Autor:** Isael De Jesús Quintero Fuentes  
 **Fecha de elaboración:** Abril 2026  
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Estado:** Borrador para consulta política y técnica
 
 \---
 
 ## Contexto y justificación
 
-La Ley 2015 de 2020 y la Resolución 1888 de 2022 establecieron la Historia Clínica Electrónica Interoperable (HCEI) en Colombia. Sin embargo, cuatro años después de su promulgación, la implementación es fragmentaria, carece de plazos perentorios, no define sanciones ejecutables y deja por fuera a gran parte de los prestadores privados.
+La Ley 2015 de 2020 y la Resolución 1888 de 2025 establecieron la Historia Clínica Electrónica Interoperable (HCEI) en Colombia. Sin embargo, cuatro años después de su promulgación, la implementación es fragmentaria, carece de plazos perentorios, no define sanciones ejecutables y deja por fuera a gran parte de los prestadores privados.
 
 **Esta propuesta no crea una nueva ley. Reglamenta y le da dientes a la que ya existe**, estableciendo cronograma, arquitectura técnica, modelo de gobernanza y sanciones creíbles.
 
@@ -215,6 +215,12 @@ Una base de datos centralizada solo contendrá la información mínima necesaria
 * Exposición pública del infractor (name and shame).
 * Cancelación de habilitación en casos graves.
 
+**Para bloqueo injustificado de información (information blocking):**
+
+* Se considera falta grave el bloqueo injustificado de información, entendido como cualquier práctica que, sin causa clínica o técnica documentada y verificable, retrase, dificulte o impida el acceso del paciente o de un prestador autorizado a la HCU.
+* La sanción será de multas de hasta 2.000 salarios mínimos legales mensuales vigentes por cada episodio comprobado, sin perjuicio de las demás sanciones administrativas y penales a que haya lugar.
+* La reincidencia en esta conducta será causal de cancelación de la habilitación para operar en el sistema de salud.
+
 ### 5.4 Incentivos positivos
 
 * Puntaje adicional en procesos de contratación pública para actores que migren antes del plazo.
@@ -276,7 +282,7 @@ Antes de la aprobación legislativa, construir un **piloto en el departamento de
 
 ## Perfil del autor
 
-Isael Quintero  
+Isael De Jesús Quintero Fuentes  
 Barranquilla, Atlántico, Colombia
 
 * Profesional en Administración de Negocios — Universidad Autónoma del Caribe.

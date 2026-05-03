@@ -1,0 +1,56 @@
+version: '3.7'
+
+# ============================================================
+# HCU Colombia — Prototipo HAPI FHIR JPA Server
+# Este archivo levanta un servidor FHIR R4 con PostgreSQL
+# para servir como base de pruebas del modelo de interoperabilidad.
+# Autor: Isael De Jesús Quintero Fuentes | Abril 2026
+# ============================================================
+
+services:
+
+  # ---- Base de Datos PostgreSQL ----
+  db:
+    image: postgres:16-alpine
+    container_name: hcu-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: hapi_fhir
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d hapi_fhir"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Servidor HAPI FHIR ----
+  hapi:
+    image: haproject/hapi:latest
+    container_name: hcu-hapi-fhir
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Configuración de conexión a la base de datos
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/hapi_fhir
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      # Dialecto HAPI FHIR para PostgreSQL
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      # Permite operaciones de escritura (crear, actualizar, eliminar)
+      HAPI_FHIR_ALLOW_EXTERNAL_REFERENCES: "true"
+      HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
+      HAPI_FHIR_ALLOW_CONTAINS_SEARCHES: "true"
+      # Configuración de logs
+      LOGGING_LEVEL_CA_UHN_FHIR: INFO
+    volumes:
+      - ./hapi.application.yaml:/app/config/application.yaml

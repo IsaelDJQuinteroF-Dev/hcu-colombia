@@ -1,0 +1,6 @@
+# HCU Colombia — Dependencias Python
+fhir.resources==8.0.1
+fhirclient==4.1.0
+requests==2.32.3
+flask==3.1.0
+pandas==2.2.3
