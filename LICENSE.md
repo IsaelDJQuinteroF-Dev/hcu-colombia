@@ -46,6 +46,8 @@ implementación, la estrategia política y los documentos de comunicación —
 fue desarrollado de manera independiente por su autor a partir de
 abril de 2025.
 
+Y fue registrado ante la DNDA por su autor
+
 Cualquier uso de este material en proyectos legislativos, iniciativas
 de política pública, documentos académicos, presentaciones o propuestas
 institucionales debe incluir atribución explícita al autor:
