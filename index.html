@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HCU Colombia — Historia Clínica Única</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #0F6E56;
+    --verde-light: #1D9E75;
+    --verde-bg: #E1F5EE;
+    --verde-dark: #085041;
+    --amarillo: #BA7517;
+    --amarillo-bg: #FAEEDA;
+    --rojo: #A32D2D;
+    --rojo-bg: #FCEBEB;
+    --azul: #185FA5;
+    --azul-bg: #E6F1FB;
+    --gris: #2C2C2A;
+    --gris-medio: #5F5E5A;
+    --gris-claro: #F1EFE8;
+    --blanco: #ffffff;
+    --borde: rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: #f7f6f2;
+    color: var(--gris);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--verde-dark);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-badge {
+    background: var(--verde-light);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .logo h1 {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .logo span {
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    font-weight: 300;
+  }
+
+  nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  nav a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  nav a:hover, nav a.active {
+    background: rgba(255,255,255,0.12);
+    color: white;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: var(--gris);
+    color: white;
+    padding: 8px 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .dot.verde { background: #5DCAA5; }
+  .dot.rojo { background: #F09595; animation: none; }
+  .dot.amarillo { background: #FAC775; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-link {
+    color: #9FE1CB;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .status-link:hover { color: #5DCAA5; }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: none;
+  }
+
+  .main.active { display: block; }
+
+  /* DASHBOARD */
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.25rem;
+    color: var(--gris);
+  }
+
+  .page-sub {
+    color: var(--gris-medio);
+    font-size: 14px;
+    font-weight: 300;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 2rem;
+  }
+
+  .kpi {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi.verde::before { background: var(--verde-light); }
+  .kpi.amarillo::before { background: var(--amarillo); }
+  .kpi.azul::before { background: var(--azul); }
+  .kpi.rojo::before { background: var(--rojo); }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gris-medio);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--gris-medio);
+    font-weight: 300;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gris-medio);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ENLACES RÁPIDOS */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+
+  .link-card {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--gris);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .link-card:hover {
+    border-color: var(--verde-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(15,110,86,0.1);
+  }
+
+  .link-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .link-icon.verde { background: var(--verde-bg); }
+  .link-icon.azul { background: var(--azul-bg); }
+  .link-icon.amarillo { background: var(--amarillo-bg); }
+  .link-icon.rojo { background: var(--rojo-bg); }
+
+  .link-text strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .link-text span {
+    font-size: 12px;
+    color: var(--gris-medio);
+    font-weight: 300;
+  }
+
+  .external-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--verde-light);
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* TABLA PACIENTES */
+  .search-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    background: white;
+  }
+
+  .search-input:focus {
+    border-color: var(--verde-light);
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--verde);
+    color: white;
+  }
+
+  .btn-primary:hover { background: var(--verde-dark); }
+
+  .btn-secondary {
+    background: var(--gris-claro);
+    color: var(--gris);
+    border: 1px solid var(--borde);
+  }
+
+  .btn-secondary:hover { background: #e8e7e2; }
+
+  .btn-danger {
+    background: var(--rojo-bg);
+    color: var(--rojo);
+    border: 1px solid rgba(163,45,45,0.2);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--gris-medio);
+    border-bottom: 2px solid var(--gris-claro);
+    background: var(--gris-claro);
+  }
+
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0efe9;
+    vertical-align: middle;
+  }
+
+  tr:hover td { background: #fafaf8; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-verde { background: var(--verde-bg); color: var(--verde-dark); }
+  .badge-amarillo { background: var(--amarillo-bg); color: #633806; }
+  .badge-azul { background: var(--azul-bg); color: #0C447C; }
+  .badge-rojo { background: var(--rojo-bg); color: var(--rojo); }
+  .badge-gris { background: var(--gris-claro); color: var(--gris-medio); }
+
+  .cc-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gris-medio);
+  }
+
+  /* FORMULARIO */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gris-medio);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input, select, textarea {
+    padding: 10px 14px;
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    background: white;
+    color: var(--gris);
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--verde-light);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .section-sep {
+    border: none;
+    border-top: 2px solid var(--gris-claro);
+    margin: 1.5rem 0;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--verde);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--verde-bg);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 560px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--gris-medio);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+
+  /* IDEAS SECTION */
+  .ideas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .idea-card {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .idea-card:hover {
+    border-color: var(--verde-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15,110,86,0.1);
+  }
+
+  .idea-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .idea-future { background: var(--azul-bg); color: #0C447C; }
+  .idea-interop { background: var(--verde-bg); color: var(--verde-dark); }
+  .idea-legal { background: var(--amarillo-bg); color: #633806; }
+  .idea-ia { background: #EEEDFE; color: #3C3489; }
+
+  .idea-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--gris);
+  }
+
+  .idea-desc {
+    font-size: 12px;
+    color: var(--gris-medio);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .alert-info { background: var(--azul-bg); color: #0C447C; border-left: 3px solid var(--azul); }
+  .alert-warn { background: var(--amarillo-bg); color: #633806; border-left: 3px solid var(--amarillo); }
+  .alert-success { background: var(--verde-bg); color: var(--verde-dark); border-left: 3px solid var(--verde-light); }
+
+  /* FOOTER */
+  footer {
+    background: var(--gris);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 3rem;
+  }
+
+  footer strong { color: rgba(255,255,255,0.85); }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 0;
+    width: 2px;
+    background: var(--gris-claro);
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+
+  .tl-dot {
+    position: absolute;
+    left: -21px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--verde-light);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--verde-light);
+  }
+
+  .tl-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gris-medio);
+    margin-bottom: 2px;
+  }
+
+  .tl-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gris);
+  }
+
+  .tl-sub {
+    font-size: 12px;
+    color: var(--gris-medio);
+    font-weight: 300;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .links-grid { grid-template-columns: 1fr 1fr; }
+    .ideas-grid { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: auto; }
+  }
+
+  /* ── DATE PICKER CUSTOM ── */
+  .date-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .date-picker select {
+    background: var(--gris-claro);
+    border: 1.5px solid var(--borde);
+    border-radius: 8px;
+    padding: 9px 10px;
+    color: var(--texto);
+    font-size: 13px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: border-color .2s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+  }
+  .date-picker select:focus { outline: none; border-color: var(--verde); }
+  .date-picker select.dp-day  { width: 74px; }
+  .date-picker select.dp-mes  { width: 130px; }
+  .date-picker select.dp-anio { width: 90px; }
+  .date-picker .dp-sep { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="fhir-url-banner" style="background:#1a1a2e;color:#a0c4ff;font-size:11px;text-align:center;padding:4px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;"></div>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-badge">HCU — COLOMBIA</div>
+      <div>
+        <h1>Historia Clínica Única</h1>
+        <span>Plataforma de Interoperabilidad FHIR R4</span>
+      </div>
+    </div>
+    <nav>
+      <a class="active" onclick="showPage('dashboard')">Dashboard</a>
+      <a onclick="showPage('pacientes')">Pacientes</a>
+      <a onclick="showPage('nuevo')">Nuevo Registro</a>
+      <a onclick="showPage('ideas')">Hoja de Ruta</a>
+    </nav>
+  </div>
+</header>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-item">
+    <span class="dot verde"></span>
+    <span>HAPI FHIR Server — </span>
+    <a href="http://localhost:8080" target="_blank" class="status-link">localhost:8080</a>
+  </div>
+  <div class="status-item">
+    <span class="dot verde"></span>
+    <span>API Metadata — </span>
+    <a href="http://localhost:8080/fhir/metadata" target="_blank" class="status-link">localhost:8080/fhir/metadata</a>
+  </div>
+  <div class="status-item">
+    <span class="dot amarillo"></span>
+    <span>App Flask — </span>
+    <a href="http://localhost:5000" target="_blank" class="status-link">localhost:5000</a>
+  </div>
+  <div class="status-item" style="margin-left: auto;">
+    <span style="color: rgba(255,255,255,0.3);">▸</span>
+    <span>DEMO — Ley 2015 de 2020</span>
+  </div>
+</div>
+
+<!-- PÁGINA: DASHBOARD -->
+<div id="page-dashboard" class="main active">
+  <div class="page-title">Centro de Control</div>
+  <div class="page-sub">Demo en vivo · Pacientes sintéticos cargados · FHIR R4 · Departamento del Atlántico</div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi verde">
+      <div class="kpi-label">Pacientes Registrados</div>
+      <div class="kpi-value" style="color: var(--verde)">10</div>
+      <div class="kpi-sub">Demo sintéticos cargados</div>
+    </div>
+    <div class="kpi azul">
+      <div class="kpi-label">Consultas del Día</div>
+      <div class="kpi-value" style="color: var(--azul)">3</div>
+      <div class="kpi-sub">Urgencias · Consulta externa</div>
+    </div>
+    <div class="kpi amarillo">
+      <div class="kpi-label">Recién Nacidos (HCU)</div>
+      <div class="kpi-value" style="color: var(--amarillo)">2</div>
+      <div class="kpi-sub">HCU generadas hoy</div>
+    </div>
+    <div class="kpi rojo">
+      <div class="kpi-label">Exámenes Duplicados Evitados</div>
+      <div class="kpi-value" style="color: var(--rojo)">0</div>
+      <div class="kpi-sub">Sin interoperabilidad activa</div>
+    </div>
+  </div>
+
+  <!-- ENLACES RÁPIDOS -->
+  <div class="card-title" style="margin-bottom: 1rem; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gris-medio);">
+    Accesos Directos del Sistema
+  </div>
+  <div class="links-grid">
+    <a class="link-card" href="http://localhost:8080" target="_blank">
+      <div class="link-icon verde">🏥</div>
+      <div class="link-text">
+        <strong>HAPI FHIR Server</strong>
+        <span>Interfaz web del servidor HL7</span>
+        <code class="external-url">localhost:8080</code>
+      </div>
+    </a>
+    <a class="link-card" href="http://localhost:8080/fhir/metadata" target="_blank">
+      <div class="link-icon azul">⚙️</div>
+      <div class="link-text">
+        <strong>Capability Statement</strong>
+        <span>Recursos FHIR disponibles (JSON)</span>
+        <code class="external-url">localhost:8080/fhir/metadata</code>
+      </div>
+    </a>
+    <a class="link-card" href="http://localhost:5000" target="_blank">
+      <div class="link-icon amarillo">🐍</div>
+      <div class="link-text">
+        <strong>API Flask / Backend</strong>
+        <span>Servidor Python de la aplicación</span>
+        <code class="external-url">localhost:5000</code>
+      </div>
+    </a>
+    <a class="link-card" href="http://localhost:8080/fhir/Patient" target="_blank">
+      <div class="link-icon verde">👥</div>
+      <div class="link-text">
+        <strong>Ver Todos los Pacientes (FHIR)</strong>
+        <span>Bundle de recursos Patient crudos</span>
+        <code class="external-url">localhost:8080/fhir/Patient</code>
+      </div>
+    </a>
+    <a class="link-card" onclick="showPage('pacientes')">
+      <div class="link-icon azul">🔍</div>
+      <div class="link-text">
+        <strong>Buscar por Cédula</strong>
+        <span>Consultar HCU de un paciente</span>
+        <code class="external-url">Vista de tabla · demo</code>
+      </div>
+    </a>
+    <a class="link-card" onclick="showPage('nuevo')">
+      <div class="link-icon amarillo">➕</div>
+      <div class="link-text">
+        <strong>Nuevo Registro / Recién Nacido</strong>
+        <span>Crear HCU · Diagnóstico de cita</span>
+        <code class="external-url">Formulario integrado</code>
+      </div>
+    </a>
+  </div>
+
+  <!-- FILA INFERIOR -->
+  <div class="grid-2">
+    <!-- PACIENTES DEMO -->
+    <div class="card">
+      <div class="card-title">Pacientes Sintéticos — Cédulas Demo</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Ciudad</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="cc-mono">1140876543</td><td>Carlos A. Martínez</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">32456789</td><td>Valentina García</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">72345678</td><td>Jorge L. Herrera</td><td>Soledad</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">45678901</td><td>Luisa F. Torres</td><td>Malambo</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">1045678234</td><td>Sebastián Ramos</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">22567891</td><td>Carmen R. Ospino</td><td>Barranquilla</td><td><span class="badge badge-azul">Mayor 65</span></td></tr>
+          <tr><td class="cc-mono">1143456789</td><td>Andrés F. Peña</td><td>Puerto Colombia</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">55234567</td><td>Diana P. Cuadrado</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td></tr>
+          <tr><td class="cc-mono">72901234</td><td>Ricardo Insignares</td><td>Barranquilla</td><td><span class="badge badge-azul">Mayor 65</span></td></tr>
+          <tr><td class="cc-mono">1047890123</td><td>Gabriela S. Meza</td><td>Galapa</td><td><span class="badge badge-amarillo">Menor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="card">
+      <div class="card-title">Actividad Reciente — Demo</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-date">Hoy 09:14</div>
+          <div class="tl-text">10 pacientes sintéticos cargados</div>
+          <div class="tl-sub">Script Python · FHIR PUT · 200 OK</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-date">Hoy 09:00</div>
+          <div class="tl-text">Servidor HAPI FHIR iniciado</div>
+          <div class="tl-sub">Docker · Puerto 8080</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background: var(--azul); box-shadow: 0 0 0 2px var(--azul);"></div>
+          <div class="tl-date">Ayer</div>
+          <div class="tl-text">HCU generada · Recién Nacido #2</div>
+          <div class="tl-sub">Patient/RN-002 · Barranquilla</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background: var(--amarillo); box-shadow: 0 0 0 2px var(--amarillo);"></div>
+          <div class="tl-date">Ayer</div>
+          <div class="tl-text">Consulta Urgencias — col-009</div>
+          <div class="tl-sub">Ricardo Insignares · Cardio</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background: var(--gris-medio); box-shadow: 0 0 0 2px var(--gris-medio);"></div>
+          <div class="tl-date">Sem. pasada</div>
+          <div class="tl-text">Configuración servidor FHIR R4</div>
+          <div class="tl-sub">QuinCon TIC · Proyecto HCU Colombia</div>
+        </div>
+      </div>
+
+      <hr class="section-sep">
+
+      <div class="alert alert-warn">
+        ⚠️ <strong>Sin conectividad con otras IPS.</strong> Interoperabilidad pendiente de fase 2.
+      </div>
+      <div class="alert alert-info">
+        ℹ️ Datos sintéticos para demo · No contienen información real de pacientes.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA: PACIENTES -->
+<div id="page-pacientes" class="main">
+  <div class="page-title">Registro de Pacientes</div>
+  <div class="page-sub">Búsqueda por cédula · Consultar historia clínica · Ver diagnósticos anteriores</div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="section-label">Buscar Paciente — Validación Registraduría RNEC</div>
+    <div class="search-bar">
+      <input type="text" class="search-input" id="buscarCC" placeholder="Ingrese número de cédula..." style="font-family: 'JetBrains Mono', monospace;" onkeydown="if(event.key==='Enter') buscarPaciente()">
+      <button class="btn btn-primary" onclick="buscarPaciente()">🔍 Verificar con RNEC</button>
+      <a href="http://localhost:8080/fhir/Patient" target="_blank" class="btn btn-secondary">Ver todos en FHIR ↗</a>
+    </div>
+    <div style="font-size:11px;color:var(--gris-medio);margin-top:6px;margin-bottom:4px;">
+      🏛️ El sistema verifica la cédula contra el <strong>Registro Nacional del Estado Civil (RNEC)</strong>
+      y confirma que los datos de la HCU coinciden con la identidad registrada.
+      En producción: conexión directa a la API RNEC — Registraduría Nacional.
+    </div>
+    <div id="resultado-busqueda"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      Todos los Pacientes Registrados
+      <a href="http://localhost:8080/fhir/Patient" target="_blank" style="font-size: 11px; color: var(--verde); text-decoration: none; font-weight: 500;">Ver en FHIR ↗</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID FHIR</th>
+          <th>Cédula</th>
+          <th>Nombre Completo</th>
+          <th>Género</th>
+          <th>Nacimiento</th>
+          <th>Ciudad</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-pacientes">
+        <tr><td class="cc-mono">col-001</td><td class="cc-mono">1140876543</td><td>Carlos Andrés Martínez Pérez</td><td>M</td><td>1985-03-12</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-001','Carlos Andrés Martínez')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-002</td><td class="cc-mono">32456789</td><td>Valentina García Rodríguez</td><td>F</td><td>1992-07-28</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-002','Valentina García')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-003</td><td class="cc-mono">72345678</td><td>Jorge Luis Herrera Blanco</td><td>M</td><td>1975-11-03</td><td>Soledad</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-003','Jorge Luis Herrera')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-004</td><td class="cc-mono">45678901</td><td>Luisa Fernanda Torres Gómez</td><td>F</td><td>1998-02-15</td><td>Malambo</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-004','Luisa Fernanda Torres')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-005</td><td class="cc-mono">1045678234</td><td>Sebastián Ramos Díaz</td><td>M</td><td>2000-09-20</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-005','Sebastián Ramos')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-006</td><td class="cc-mono">22567891</td><td>Carmen Rosa Ospino Villalba</td><td>F</td><td>1960-05-08</td><td>Barranquilla</td><td><span class="badge badge-azul">Mayor 65</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-006','Carmen Rosa Ospino')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-007</td><td class="cc-mono">1143456789</td><td>Andrés Felipe Peña Castro</td><td>M</td><td>1990-12-30</td><td>Puerto Colombia</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-007','Andrés Felipe Peña')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-008</td><td class="cc-mono">55234567</td><td>Diana Patricia Cuadrado Mejía</td><td>F</td><td>1982-04-17</td><td>Barranquilla</td><td><span class="badge badge-verde">Activo</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-008','Diana Patricia Cuadrado')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-009</td><td class="cc-mono">72901234</td><td>Ricardo Insignares De la Hoz</td><td>M</td><td>1955-08-22</td><td>Barranquilla</td><td><span class="badge badge-azul">Mayor 65</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-009','Ricardo Insignares')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+        <tr><td class="cc-mono">col-010</td><td class="cc-mono">1047890123</td><td>Gabriela Sofía Meza Fuentes</td><td>F</td><td>2003-01-14</td><td>Galapa</td><td><span class="badge badge-amarillo">Menor</span></td><td><button class="btn btn-secondary" onclick="verHCU('col-010','Gabriela Sofía Meza')" style="padding:4px 10px; font-size:11px;">Ver HCU</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PÁGINA: NUEVO REGISTRO -->
+<div id="page-nuevo" class="main">
+  <div class="page-title">Nuevo Registro Clínico</div>
+  <div class="page-sub">Registrar nuevo paciente · Diagnóstico de cita · HCU para recién nacidos</div>
+
+  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+    ℹ️ Una <strong>nueva HCU</strong> se crea para cualquier persona que <strong>no tenga registro previo en el sistema</strong>: recién nacidos, personas provenientes del exterior, ciudadanos que nunca han accedido al sistema de salud formal, o casos especiales sin documento vigente. Para pacientes ya registrados, busque por cédula en la pestaña <strong>Pacientes</strong>.
+  </div>
+
+  <!-- SELECTOR DE TIPO -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="section-label">Tipo de Registro</div>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button class="btn btn-primary" id="btn-rn" onclick="setTipo('rn')">👶 Recién Nacido</button>
+      <button class="btn btn-secondary" id="btn-np" onclick="setTipo('np')">🆕 Nuevo Paciente sin HC previa</button>
+      <button class="btn btn-secondary" id="btn-cx" onclick="setTipo('cx')">🩺 Diagnóstico / Consulta</button>
+      <button class="btn btn-secondary" id="btn-urg" onclick="setTipo('urg')">🚨 Urgencias</button>
+    </div>
+  </div>
+
+  <!-- FORMULARIO NUEVO PACIENTE SIN HC PREVIA -->
+  <div id="form-np" class="card" style="display:none;">
+    <div class="section-label">Nuevo Paciente sin Historia Clínica Previa</div>
+    <div class="alert alert-warn" style="margin-bottom:1rem;">
+      ⚠️ Use este formulario para personas extranjeras, ciudadanos que nunca han ingresado al sistema de salud colombiano, o casos especiales. Si el paciente aparece en SISBÉN, ingrese su cédula para pre-validar.
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Tipo de Documento</label>
+        <select id="np-tipo-doc">
+          <option value="CC">Cédula de Ciudadanía (CC)</option>
+          <option value="CE">Cédula de Extranjería (CE)</option>
+          <option value="PA">Pasaporte</option>
+          <option value="RC">Registro Civil</option>
+          <option value="TI">Tarjeta de Identidad</option>
+          <option value="SC">Sin Documento</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Número de Documento</label>
+        <input type="text" id="np-doc" placeholder="Número de documento" style="font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div class="form-group">
+        <label>Nombres *</label>
+        <input type="text" id="np-nombres" placeholder="Nombres completos">
+      </div>
+      <div class="form-group">
+        <label>Apellidos *</label>
+        <input type="text" id="np-apellidos" placeholder="Apellidos completos">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Nacimiento *</label>
+        <input type="date" id="np-nac">
+      </div>
+      <div class="form-group">
+        <label>Género</label>
+        <select id="np-genero">
+          <option value="female">Femenino</option>
+          <option value="male">Masculino</option>
+          <option value="other">Otro / No especifica</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>País de Origen</label>
+        <input type="text" id="np-pais" placeholder="Colombia" value="Colombia">
+      </div>
+      <div class="form-group">
+        <label>Ciudad de Residencia</label>
+        <input type="text" id="np-ciudad" placeholder="Barranquilla">
+      </div>
+      <div class="form-group full">
+        <label>Motivo de consulta inicial</label>
+        <textarea id="np-motivo" placeholder="Descripción del motivo de consulta..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn btn-secondary" onclick="setTipo('rn')">Cancelar</button>
+      <button class="btn btn-primary" onclick="registrarNuevoPaciente()">✅ Crear HCU en FHIR</button>
+    </div>
+    <div id="resultado-np" style="margin-top:1rem;"></div>
+  </div>
+
+
+  <div id="form-rn" class="card">
+    <div class="section-label">Datos del Recién Nacido — Nueva HCU</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Primer Nombre</label>
+        <input type="text" placeholder="Ej: Sofía">
+      </div>
+      <div class="form-group">
+        <label>Segundo Nombre</label>
+        <input type="text" placeholder="Ej: Valentina">
+      </div>
+      <div class="form-group">
+        <label>Primer Apellido</label>
+        <input type="text" placeholder="Ej: García">
+      </div>
+      <div class="form-group">
+        <label>Segundo Apellido</label>
+        <input type="text" placeholder="Ej: Martínez">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Nacimiento</label>
+        <input type="date" id="fecha-nac">
+      </div>
+      <div class="form-group">
+        <label>Sexo Biológico</label>
+        <select>
+          <option value="">Seleccione...</option>
+          <option value="female">Femenino</option>
+          <option value="male">Masculino</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Peso al nacer (gramos)</label>
+        <input type="number" placeholder="Ej: 3250">
+      </div>
+      <div class="form-group">
+        <label>Talla (cm)</label>
+        <input type="number" placeholder="Ej: 50">
+      </div>
+    </div>
+
+    <hr class="section-sep">
+    <div class="section-label">Datos de la Madre</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre Completo de la Madre</label>
+        <input type="text" placeholder="Ej: María Elena García Pérez">
+      </div>
+      <div class="form-group">
+        <label>Cédula de la Madre</label>
+        <input type="text" placeholder="Ej: 32456789" style="font-family: 'JetBrains Mono', monospace;">
+      </div>
+      <div class="form-group">
+        <label>EPS</label>
+        <select>
+          <option value="">Seleccione EPS...</option>
+          <option>Nueva EPS</option>
+          <option>Sura</option>
+          <option>Sanitas</option>
+          <option>Comfenalco</option>
+          <option>Compensar</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>IPS / Hospital</label>
+        <input type="text" placeholder="Ej: Hospital Universitario del Caribe">
+      </div>
+    </div>
+
+    <hr class="section-sep">
+    <div class="section-label">Datos Clínicos del Parto</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Tipo de Parto</label>
+        <select>
+          <option>Eutócico (Natural)</option>
+          <option>Cesárea</option>
+          <option>Instrumental</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Semanas de Gestación</label>
+        <input type="number" placeholder="Ej: 38" min="22" max="42">
+      </div>
+      <div class="form-group">
+        <label>Apgar Minuto 1</label>
+        <input type="number" placeholder="0-10" min="0" max="10">
+      </div>
+      <div class="form-group">
+        <label>Apgar Minuto 5</label>
+        <input type="number" placeholder="0-10" min="0" max="10">
+      </div>
+      <div class="form-group full">
+        <label>Observaciones Clínicas</label>
+        <textarea placeholder="Ej: Parto sin complicaciones. RN vigoroso. Llanto inmediato..."></textarea>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 1rem;">
+      <button class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-primary" onclick="simularGuardado('rn')">💾 Crear HCU en FHIR</button>
+    </div>
+  </div>
+
+  <!-- FORMULARIO CONSULTA -->
+  <div id="form-cx" class="card" style="display:none;">
+    <div class="section-label">Diagnóstico / Consulta de Cita</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cédula del Paciente</label>
+        <input type="text" placeholder="Ej: 1140876543" style="font-family: 'JetBrains Mono', monospace;">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Consulta</label>
+        <input type="date">
+      </div>
+      <div class="form-group">
+        <label>Médico Tratante</label>
+        <input type="text" placeholder="Ej: Dr. Ramírez Solano">
+      </div>
+      <div class="form-group">
+        <label>Especialidad</label>
+        <select>
+          <option>Medicina General</option>
+          <option>Urgencias</option>
+          <option>Cardiología</option>
+          <option>Pediatría</option>
+          <option>Ginecología</option>
+          <option>Ortopedia</option>
+          <option>Neurología</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Código CIE-10 Principal</label>
+        <input type="text" placeholder="Ej: J06.9 — Infección aguda IVRS">
+      </div>
+      <div class="form-group">
+        <label>Motivo de Consulta</label>
+        <input type="text" placeholder="Ej: Fiebre de 3 días, tos seca">
+      </div>
+      <div class="form-group full">
+        <label>Diagnóstico y Plan de Manejo</label>
+        <textarea rows="4" placeholder="Ej: Paciente de 39 años con cuadro de 72h de evolución..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Alergias Conocidas</label>
+        <input type="text" placeholder="Ej: Penicilina — urticaria">
+      </div>
+      <div class="form-group">
+        <label>Medicamentos Formulados</label>
+        <input type="text" placeholder="Ej: Amoxicilina 500mg c/8h x 7 días">
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 1rem;">
+      <button class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-primary" onclick="simularGuardado('cx')">💾 Registrar en FHIR</button>
+    </div>
+  </div>
+
+  <!-- FORMULARIO URGENCIAS -->
+  <div id="form-urg" class="card" style="display:none;">
+    <div class="alert alert-warn" style="margin-bottom: 1rem;">
+      🚨 Ingreso por urgencias. Verifique que el paciente no tenga registros activos en otras IPS antes de continuar.
+    </div>
+    <div class="section-label">Datos de Urgencias</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cédula / Documento</label>
+        <input type="text" placeholder="Cédula, TI, pasaporte..." style="font-family: 'JetBrains Mono', monospace;">
+      </div>
+      <div class="form-group">
+        <label>Triage</label>
+        <select>
+          <option value="1">I — Reanimación (Inmediato)</option>
+          <option value="2">II — Emergencia (&lt; 15 min)</option>
+          <option value="3" selected>III — Urgente (&lt; 30 min)</option>
+          <option value="4">IV — Menos urgente</option>
+          <option value="5">V — No urgente</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Motivo de Consulta</label>
+        <input type="text" placeholder="Ej: Dolor torácico irradiado">
+      </div>
+      <div class="form-group">
+        <label>Signos Vitales — TA</label>
+        <input type="text" placeholder="Ej: 120/80 mmHg">
+      </div>
+      <div class="form-group">
+        <label>FC (lpm)</label>
+        <input type="number" placeholder="Ej: 88">
+      </div>
+      <div class="form-group">
+        <label>SatO2 (%)</label>
+        <input type="number" placeholder="Ej: 97">
+      </div>
+      <div class="form-group full">
+        <label>Nota de Urgencias</label>
+        <textarea rows="3" placeholder="Descripción del cuadro clínico, antecedentes relevantes..."></textarea>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 1rem;">
+      <button class="btn btn-secondary">Cancelar</button>
+      <button class="btn btn-primary" onclick="simularGuardado('urg')">🚨 Registrar Urgencia en FHIR</button>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA: IDEAS / HOJA DE RUTA -->
+<div id="page-ideas" class="main">
+  <div class="page-title">Hoja de Ruta · Ideas de Expansión</div>
+  <div class="page-sub">Módulos propuestos para escalar el proyecto HCU Colombia más allá de la demo</div>
+
+  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+    📌 <strong>SISBÉN como base de datos de arranque:</strong> El Sistema de Identificación de Potenciales Beneficiarios (SISBÉN) clasifica socioeconómicamente a ~48 millones de colombianos. En la fase 2 del proyecto, la integración con SISBÉN permitiría pre-poblar automáticamente la HCU con datos demográficos ya verificados, reduciendo fricciones en el registro inicial y asegurando cobertura real de toda la población.
+  </div>
+
+  <div class="ideas-grid">
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">SISBÉN / Integración</span>
+      <div class="idea-title">Pre-carga desde SISBÉN</div>
+      <div class="idea-desc">Al ingresar la cédula, el sistema consulta SISBÉN y pre-llena nombre, dirección, estrato y EPS. Elimina el 80% del trabajo de digitación. ~48 millones de colombianos ya clasificados — la base existe.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">Interoperabilidad</span>
+      <div class="idea-title">Conector Multi-IPS en tiempo real</div>
+      <div class="idea-desc">Federación FHIR entre hospitales del Atlántico. Un médico de urgencias en Soledad puede ver en segundos la historia de una EPS en Barranquilla. Reducción estimada del 15% de exámenes duplicados.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-ia">Inteligencia Artificial</span>
+      <div class="idea-title">Detección temprana — modelo tipo REDMOD</div>
+      <div class="idea-desc">Mayo Clinic demostró (abril 2026) que IA detecta cáncer de páncreas 16 meses antes usando tomografías de rutina. Este modelo requiere HCU para identificar pacientes de alto riesgo. Sin HCU, Colombia no puede implementarlo.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-ia">Inteligencia Artificial</span>
+      <div class="idea-title">Alerta de Alergias y Polimedicación</div>
+      <div class="idea-desc">Modelo que analiza el historial y alerta al médico antes de formular un medicamento contraindicado. Crucial para pacientes politratados y adultos mayores con múltiples EPS.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-future">Expansión</span>
+      <div class="idea-title">QR de Emergencia por Paciente</div>
+      <div class="idea-desc">Cada paciente recibe un QR que enlaza directamente a su HCU. En una emergencia donde no puede hablar, el médico escanea y accede al historial en 3 segundos. Sin apps especiales.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-future">Expansión</span>
+      <div class="idea-title">App Móvil para Zonas Rurales</div>
+      <div class="idea-desc">Modo offline-first para médicos rurales de la Guajira o el Magdalena. Sincronización cuando hay conectividad. La HCU viaja con el paciente, no con el hospital.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-legal">Legal / Regulatorio</span>
+      <div class="idea-title">Consentimiento Informado Digital</div>
+      <div class="idea-desc">Firma digital del paciente integrada al recurso FHIR Consent. Cumplimiento Ley 2015 de 2020 y Resolución 1888 de 2025. Trazabilidad completa en bitácora inmodificable.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-ia">Inteligencia Artificial</span>
+      <div class="idea-title">Dashboard Epidemiológico Departamental</div>
+      <div class="idea-desc">Visualización de patrones de enfermedad por municipio usando datos anonimizados. Permite a la Secretaría de Salud del Atlántico anticipar brotes y distribuir recursos preventivamente.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">Interoperabilidad</span>
+      <div class="idea-title">Integración ADRES — Validación de Afiliación</div>
+      <div class="idea-desc">Consulta en tiempo real de afiliación a EPS durante el triage. Reduce glosas hospitalarias y evita atenciones no cubiertas. Conexión bidireccional con SISPRO nacional.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-future">Expansión</span>
+      <div class="idea-title">Portal del Paciente (Self-Service)</div>
+      <div class="idea-desc">El ciudadano accede a su propia HCU con cédula + OTP. Puede descargar resultados, ver diagnósticos y compartir su historia con cualquier IPS del país sin papeleo ni intermediarios.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-legal">Legal / Regulatorio</span>
+      <div class="idea-title">Módulo de Glosas y Auditoría</div>
+      <div class="idea-desc">Trazabilidad de cada registro para responder procesos de auditoría de EPS. Reduce indemnizaciones por errores documentales. Exportación a PDF firmado digitalmente.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">Extranjeros / Migrantes</span>
+      <div class="idea-title">HC para Población Migrante</div>
+      <div class="idea-desc">Venezuela tiene ~2.9M migrantes en Colombia, muchos sin CC. Un módulo específico para CE, PPT y pasaportes con integración a Migración Colombia garantiza atención sin barreras documentales.</div>
+    </div>
+  </div>
+
+
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">Interoperabilidad</span>
+      <div class="idea-title">Conector Multi-IPS en tiempo real</div>
+      <div class="idea-desc">Federación FHIR entre hospitales del Atlántico. Un médico de urgencias en Soledad puede ver en segundos la historia de una EPS en Barranquilla. Reducción estimada del 15% de exámenes duplicados.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-ia">Inteligencia Artificial</span>
+      <div class="idea-title">Alerta de Alergias y Polimedicación</div>
+      <div class="idea-desc">Modelo de IA que analiza el historial del paciente y alerta al médico antes de formular un medicamento contraindicated. Crucial para pacientes politratados y adultos mayores.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-future">Expansion</span>
+      <div class="idea-title">App Móvil para Zonas Rurales</div>
+      <div class="idea-desc">Modo offline-first para médicos rurales de la Guajira o el Magdalena. Sincronización cuando hay conectividad. La HCU viaja con el paciente, no con el hospital.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-legal">Legal / Regulatorio</span>
+      <div class="idea-title">Consentimiento Informado Digital</div>
+      <div class="idea-desc">Firma digital del paciente integrada al recurso FHIR Consent. Cumplimiento Ley 2015 de 2020 y Resolución 866 de 2021. Trazabilidad completa en blockchain opcional.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-ia">Inteligencia Artificial</span>
+      <div class="idea-title">Dashboard Epidemiológico Departamental</div>
+      <div class="idea-desc">Visualización de patrones de enfermedad por municipio usando datos anonimizados. Permite a la Secretaría de Salud del Atlántico anticipar brotes y distribuir recursos.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-interop">Interoperabilidad</span>
+      <div class="idea-title">Integración con ADRES y SISPRO</div>
+      <div class="idea-desc">Conexión bidireccional con los sistemas nacionales de información de salud. Validación de afiliación ADRES en tiempo real durante el triage para reducir glosas.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-future">Expansion</span>
+      <div class="idea-title">Portal del Paciente (Self-Service)</div>
+      <div class="idea-desc">El ciudadano accede a su propia HCU con cédula + OTP. Puede descargar resultados, ver diagnósticos y compartir su historia con cualquier IPS del país sin papeleo.</div>
+    </div>
+    <div class="idea-card">
+      <span class="idea-badge idea-legal">Legal / Regulatorio</span>
+      <div class="idea-title">Módulo de Glosas y Auditoría</div>
+      <div class="idea-desc">Trazabilidad de cada registro para responder procesos de auditoría de EPS. Reduce los 50–500 millones en indemnizaciones por errores documentales. Exportación a PDF firmado.</div>
+    </div>
+  </div>
+
+  <div class="alert alert-success" style="margin-top: 1.5rem;">
+    ✅ Una reducción del 10% de eventos adversos mediante mejores sistemas de información representaría un ahorro de cientos de miles de millones de pesos anuales para el sistema de salud colombiano. — Proyecto HCU Colombia
+  </div>
+</div>
+
+<!-- MODAL: VER HCU -->
+<div class="modal-overlay" id="modal-hcu">
+  <div class="modal">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <div>
+        <div class="modal-title" id="modal-nombre">Historia Clínica</div>
+        <div class="modal-sub" id="modal-sub">Paciente · FHIR R4</div>
+      </div>
+      <button onclick="cerrarModal()" style="background: var(--gris-claro); border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;">✕ Cerrar</button>
+    </div>
+    <div class="alert alert-info" id="modal-body">ℹ️ Esta HCU contiene datos cargados desde el servidor FHIR.</div>
+    <div style="display: flex; gap: 12px; margin-top: 1rem; flex-wrap: wrap;">
+      <a id="link-fhir" href="#" target="_blank" class="btn btn-primary">Ver Recurso en FHIR ↗</a>
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GUARDADO -->
+<div class="modal-overlay" id="modal-ok">
+  <div class="modal" style="text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 1rem;">✅</div>
+    <div class="modal-title" id="modal-ok-title">Registro creado</div>
+    <div class="modal-sub" id="modal-ok-sub">El recurso se registraría en el servidor FHIR.</div>
+    <div class="alert alert-warn" style="text-align: left; margin: 1rem 0;">⚠️ Modo Demo — El formulario está desconectado del servidor. Conecte su backend Flask en localhost:5000 para persistir datos.</div>
+    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 1rem;">
+      <a href="http://localhost:8080/fhir/Patient" target="_blank" class="btn btn-primary">Ver Pacientes en FHIR ↗</a>
+      <button onclick="cerrarModalOk()" class="btn btn-secondary">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>HCU Colombia</strong> · Historia Clínica Única Interoperable · FHIR R4 · Ley 2015 de 2020 &nbsp;|&nbsp;
+  QuinCon TIC · Isael Quintero Fuentes &nbsp;|&nbsp;
+  Departamento del Atlántico · Colombia
+</footer>
+
+<script>
+  // URL dinámica — acepta ?fhir=URL o usa localhost por defecto
+  const params = new URLSearchParams(window.location.search);
+  const FHIR = (params.get('fhir') || 'http://localhost:8080/fhir').replace(/\/+$/, '');
+  const NGROK = FHIR.includes('ngrok');
+
+  // Fetch con bypass ngrok interstitial
+  function fhirFetch(url, opts={}) {
+    const h = {'ngrok-skip-browser-warning':'true'};
+    if(opts.headers) Object.assign(h, opts.headers);
+    return fetch(url, {...opts, headers:h});
+  }
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', function() {
+    initDatePickers();
+    // Show FHIR server URL in banner
+    const banner = document.getElementById('fhir-url-banner');
+    if(banner) banner.textContent = '🌐 Servidor HCU: ' + FHIR;
+    const hoy = new Date().toISOString().split('T')[0];
+    const fechaNac = document.getElementById('fecha-nac');
+    if (fechaNac) fechaNac.value = hoy;
+    cargarKPIs();
+    cargarTablaFHIR();
+  });
+
+  // ── KPIs desde FHIR ──
+  async function cargarKPIs() {
+    try {
+      const r = await fhirFetch(`${FHIR}/Patient?_count=1&_summary=count`, {signal: AbortSignal.timeout(5000)});
+      if (r.ok) {
+        const d = await r.json();
+        const total = d.total || 0;
+        const kpiEl = document.querySelector('.kpi.verde .kpi-value');
+        if (kpiEl) { kpiEl.textContent = total; kpiEl.style.color = 'var(--verde)'; }
+        // Actualizar status bar
+        document.querySelectorAll('.dot.amarillo').forEach(d => d.className = 'dot verde');
+      }
+    } catch(e) {
+      console.warn('FHIR no disponible para KPIs:', e.message);
+    }
+  }
+
+  // ── CARGAR TABLA DESDE FHIR ──
+  async function cargarTablaFHIR() {
+    const tbody = document.getElementById('tabla-pacientes');
+    if (!tbody) return;
+    try {
+      const r = await fhirFetch(`${FHIR}/Patient?_count=100`);
+      if (!r.ok) return;
+      const data = await r.json();
+      const pacientes = (data.entry || []).map(e => e.resource);
+      if (!pacientes.length) return;
+      tbody.innerHTML = pacientes.map(p => {
+        const nombre = getNombre(p);
+        const cc = getCC(p);
+        const edad = p.birthDate ? calcularEdad(p.birthDate) : '—';
+        const genero = p.gender === 'male' ? 'M' : 'F';
+        const ciudad = p.address?.[0]?.city || '—';
+        const badge = edad !== '—' && parseInt(edad) >= 65
+          ? '<span class="badge badge-azul">Mayor 65</span>'
+          : edad !== '—' && parseInt(edad) < 18
+          ? '<span class="badge badge-amarillo">Menor</span>'
+          : '<span class="badge badge-verde">Activo</span>';
+        return `<tr>
+          <td class="cc-mono">${p.id}</td>
+          <td class="cc-mono">${cc}</td>
+          <td>${nombre}</td>
+          <td>${genero}</td>
+          <td>${p.birthDate || '—'}</td>
+          <td>${ciudad}</td>
+          <td>${badge}</td>
+          <td><button class="btn btn-secondary" onclick="verHCU('${p.id}','${nombre.replace(/'/g,"\\'")}',true)" style="padding:4px 10px;font-size:11px;">Ver HCU</button></td>
+        </tr>`;
+      }).join('');
+    } catch(e) {
+      console.warn('No se pudo cargar tabla desde FHIR:', e.message);
+    }
+  }
+
+  // ── NAVEGACIÓN ──
+  function showPage(p) {
+    document.querySelectorAll('.main').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + p).classList.add('active');
+    const navLinks = document.querySelectorAll('nav a');
+    const pageIndex = { dashboard: 0, pacientes: 1, nuevo: 2, ideas: 3 };
+    if (pageIndex[p] !== undefined) navLinks[pageIndex[p]]?.classList.add('active');
+    window.scrollTo(0, 0);
+    if (p === 'pacientes') cargarTablaFHIR();
+  }
+
+  // ── TIPO DE FORMULARIO ──
+  function setTipo(tipo) {
+    ['rn','np','cx','urg'].forEach(t => {
+      const form = document.getElementById('form-' + t);
+      const btn  = document.getElementById('btn-' + t);
+      if (form) form.style.display = 'none';
+      if (btn)  btn.className = 'btn btn-secondary';
+    });
+    const f = document.getElementById('form-' + tipo);
+    const b = document.getElementById('btn-' + tipo);
+    if (f) f.style.display = 'block';
+    if (b) b.className = 'btn btn-primary';
+  }
+
+  // ── BUSCAR PACIENTE — REAL FHIR ──
+  async function buscarPaciente() {
+    const cc  = document.getElementById('buscarCC').value.trim();
+    const res = document.getElementById('resultado-busqueda');
+    if (!cc) { res.innerHTML = '<div class="alert alert-warn">⚠️ Ingrese un número de cédula.</div>'; return; }
+
+    res.innerHTML = `<div class="alert alert-info" style="display:flex;align-items:center;gap:10px;">
+      <span>🏛️</span>&nbsp; Consultando Registro Nacional del Estado Civil (RNEC)...
+    </div>`;
+    await new Promise(r => setTimeout(r, 900));
+
+    try {
+      const r = await fhirFetch(`${FHIR}/Patient?identifier=${cc}`);
+      const data = await r.json();
+
+      if (data.total > 0) {
+        const p      = data.entry[0].resource;
+        const nombre = getNombre(p);
+        const fhirId = p.id;
+        const ciudad = p.address?.[0]?.city || 'Barranquilla';
+        const nac    = p.birthDate || '—';
+        const sistema = p.identifier?.[0]?.system || '';
+        const rnecOk  = sistema.includes('registraduria');
+        const ts = new Date().toLocaleString('es-CO');
+        const nombreEsc = nombre.replace(/'/g, "\\'");
+
+        res.innerHTML = `
+          <div style="border:2px solid var(--verde);border-radius:12px;overflow:hidden;margin-top:10px;">
+            <div style="background:var(--verde);color:#fff;padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:20px;">🏛️</span>
+              <div>
+                <strong>Identidad ${rnecOk ? 'verificada' : 'en sistema'} — Registraduría Nacional del Estado Civil</strong><br>
+                <span style="font-size:11px;opacity:.85;">C.C. N° ${cc} &nbsp;·&nbsp; Consulta registrada: ${ts}</span>
+              </div>
+              <span style="margin-left:auto;background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 12px;font-size:11px;white-space:nowrap;">
+                ${rnecOk ? '✅ RNEC Confirmado' : '🔄 Sistema HCU'}
+              </span>
+            </div>
+            <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:#fff;">
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:3px;">Nombre completo</div>
+                <strong style="font-size:15px;">${nombre}</strong>
+              </div>
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:3px;">Cédula CC</div>
+                <code style="font-family:'JetBrains Mono',monospace;font-size:14px;">${cc}</code>
+              </div>
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:3px;">Fecha nacimiento</div>
+                <span>${nac}</span>
+              </div>
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:3px;">Ciudad</div>
+                <span>${ciudad}, Atlántico</span>
+              </div>
+            </div>
+            <div style="padding:10px 16px;background:var(--gris-claro);display:flex;gap:8px;align-items:center;border-top:1px solid var(--borde);flex-wrap:wrap;">
+              <span style="font-size:11px;color:var(--gris-medio);">ID FHIR: <code style="font-family:'JetBrains Mono',monospace;">${fhirId}</code></span>
+              <div style="margin-left:auto;display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="verHCU('${fhirId}','${nombreEsc}',true)">Ver HCU Completa →</button>
+                <a href="${FHIR}/Patient/${fhirId}" target="_blank" class="btn btn-secondary" style="text-decoration:none;">FHIR Raw ↗</a>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;padding:8px 12px;background:var(--amarillo-bg);border-radius:8px;font-size:11px;color:var(--amarillo);">
+            ℹ️ <strong>Modo demo:</strong> En producción, este paso llama a la API oficial del RNEC — confirma nombre y fecha de nacimiento en tiempo real. Cero suplantación de identidad.
+          </div>`;
+      } else {
+        res.innerHTML = `
+          <div style="border:2px solid var(--rojo);border-radius:12px;overflow:hidden;margin-top:10px;">
+            <div style="background:var(--rojo);color:#fff;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;">
+              🏛️&nbsp; <strong>C.C. N° ${cc} — No encontrada en el sistema HCU Colombia</strong>
+            </div>
+            <div style="padding:16px;background:#fff;">
+              <p style="font-size:14px;color:var(--gris-medio);margin-bottom:12px;">Esta cédula no tiene Historia Clínica registrada. Puede crear una nueva HCU ahora.</p>
+              <button class="btn btn-primary"
+                onclick="document.getElementById('np-doc').value='${cc}'; showPage('nuevo'); setTipo('np');">
+                📋 Crear nueva HCU para CC ${cc} →
+              </button>
+            </div>
+          </div>`;
+      }
+    } catch(e) {
+      res.innerHTML = `<div class="alert alert-warn">❌ Error conectando al servidor FHIR. Verifique que Docker esté corriendo.</div>`;
+    }
+  }
+
+
+  // ── VER HCU COMPLETA — REAL FHIR ──
+  async function verHCU(id, nombre, fromFHIR) {
+    document.getElementById('modal-nombre').textContent = nombre;
+    document.getElementById('modal-sub').textContent = 'Cargando historia clínica desde servidor...';
+    document.getElementById('link-fhir').href = `${FHIR}/Patient/${id}`;
+    document.getElementById('modal-hcu').classList.add('open');
+
+    const body = document.getElementById('modal-body');
+    if (!body) return;
+    body.innerHTML = '<div class="alert alert-info">⏳ Consultando servidor HCU Colombia...</div>';
+
+    try {
+      const [pR, aR, cR, mR, eR] = await Promise.all([
+        fhirFetch(`${FHIR}/Patient/${id}`).then(r=>r.json()),
+        fhirFetch(`${FHIR}/AllergyIntolerance?patient=${id}`).then(r=>r.json()),
+        fhirFetch(`${FHIR}/Condition?subject=${id}`).then(r=>r.json()),
+        fhirFetch(`${FHIR}/MedicationStatement?subject=${id}`).then(r=>r.json()),
+        fhirFetch(`${FHIR}/Encounter?subject=${id}`).then(r=>r.json()),
+      ]);
+
+      const alergias    = (aR.entry||[]).map(e => e.resource?.code?.text || 'No especificada');
+      const condiciones = (cR.entry||[]).map(e => e.resource?.code?.text || 'No especificada');
+      const medicamentos= (mR.entry||[]).map(e => e.resource?.medicationCodeableConcept?.text || 'No especificado');
+      const encuentros  = (eR.entry||[]).map(e => e.resource);
+      const cc = getCC(pR);
+      const ts = new Date().toLocaleString('es-CO');
+
+      const lista = (items, vacioMsg) => items.length
+        ? items.map(i => `<div style="padding:6px 10px;background:#f7f6f2;border-radius:6px;margin-bottom:4px;font-size:13px;">${i}</div>`).join('')
+        : `<div style="color:var(--gris-medio);font-size:13px;font-style:italic;">✅ ${vacioMsg}</div>`;
+
+      document.getElementById('modal-sub').textContent = `CC: ${cc} · FHIR ID: ${id} · FHIR R4`;
+
+      body.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1rem;">
+          <div style="background:var(--gris-claro);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:4px;">⚠️ Alergias</div>
+            ${lista(alergias, 'Sin alergias documentadas')}
+          </div>
+          <div style="background:var(--gris-claro);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:4px;">🔴 Condiciones</div>
+            ${lista(condiciones, 'Sin condiciones crónicas')}
+          </div>
+          <div style="background:var(--gris-claro);border-radius:8px;padding:12px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:4px;">💊 Medicamentos</div>
+            ${lista(medicamentos, 'Sin medicamentos activos')}
+          </div>
+        </div>
+        ${encuentros.length ? `<div style="margin-bottom:1rem;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris-medio);margin-bottom:8px;">🩺 Visitas registradas (${encuentros.length})</div>
+          ${encuentros.map(e=>`<div style="padding:8px 12px;background:#f7f6f2;border-radius:6px;margin-bottom:4px;font-size:12px;font-family:'JetBrains Mono',monospace;">
+            ${e.period?.start?.split('T')[0]||'—'} · ${e.serviceType?.text||e.class?.code||'Consulta'} · ID: ${e.id}
+          </div>`).join('')}
+        </div>` : ''}
+        <div style="background:#faeeda;border-radius:8px;padding:10px 14px;font-size:12px;color:#633806;display:flex;align-items:center;gap:8px;">
+          ⚠️ <strong>Acceso registrado en bitácora inmodificable</strong> — ${ts}
+        </div>`;
+    } catch(e) {
+      body.innerHTML = `<div class="alert alert-warn">❌ Error consultando el servidor FHIR. Verifique la conexión.</div>`;
+    }
+  }
+
+  function cerrarModal() { document.getElementById('modal-hcu').classList.remove('open'); }
+  function cerrarModalOk() { document.getElementById('modal-ok').classList.remove('open'); }
+
+  // ── REGISTRAR NUEVO PACIENTE ──
+  async function registrarNuevoPaciente() {
+    const tipoDoc  = document.getElementById('np-tipo-doc').value;
+    const doc      = document.getElementById('np-doc').value.trim();
+    const nombres  = document.getElementById('np-nombres').value.trim();
+    const apellidos= document.getElementById('np-apellidos').value.trim();
+    const nac      = document.getElementById('np-nac').value;
+    const genero   = document.getElementById('np-genero').value;
+    const pais     = document.getElementById('np-pais').value.trim() || 'Colombia';
+    const ciudad   = document.getElementById('np-ciudad').value.trim() || 'Barranquilla';
+    const el       = document.getElementById('resultado-np');
+
+    if (!nombres || !apellidos || !nac) {
+      el.innerHTML = '<div class="alert alert-warn">⚠️ Complete los campos obligatorios.</div>';
+      return;
+    }
+
+    const recurso = {
+      resourceType: "Patient",
+      identifier: doc ? [{ system: tipoDoc === 'CC' ? 'https://www.registraduria.gov.co' : `http://hcu-colombia.gov.co/${tipoDoc}`, value: doc }] : [],
+      name: [{ use: "official", family: apellidos, given: nombres.split(' ') }],
+      gender: genero, birthDate: nac,
+      address: [{ city: ciudad, country: pais }],
+      text: { status: "generated", div: `<div>${nombres} ${apellidos} — ${tipoDoc}: ${doc||'Sin documento'}</div>` }
+    };
+
+    el.innerHTML = '<div class="alert alert-info">⏳ Creando HCU en servidor FHIR...</div>';
+    try {
+      const r = await fhirFetch(`${FHIR}/Patient`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/fhir+json' },
+        body: JSON.stringify(recurso)
+      });
+      if (r.status === 201) {
+        const data = await r.json();
+        el.innerHTML = `<div class="alert alert-success">✅ HCU creada exitosamente. ID FHIR: <strong>${data.id}</strong></div>
+          <a href="${FHIR}/Patient/${data.id}" target="_blank" class="btn btn-primary" style="text-decoration:none;">Ver en FHIR ↗</a>`;
+        cargarKPIs();
+      } else {
+        el.innerHTML = `<div class="alert alert-warn">❌ Error ${r.status} al crear el paciente.</div>`;
+      }
+    } catch(e) {
+      el.innerHTML = `<div class="alert alert-warn">❌ Error conectando al servidor FHIR.</div>`;
+    }
+  }
+
+  // ── SIMULAR GUARDADO (formularios RN/CX/URG aún en modo demo) ──
+  function simularGuardado(tipo) {
+    const titulos = {
+      rn: '👶 HCU de Recién Nacido — enviado al servidor FHIR',
+      cx: '🩺 Consulta registrada como Encounter FHIR',
+      urg: '🚨 Urgencia registrada con prioridad EMERGENCIA'
+    };
+    const subs = {
+      rn: 'Recurso Patient + Observation (Apgar/peso/talla) → FHIR.',
+      cx: 'Recurso Encounter + Condition (CIE-10) → FHIR.',
+      urg: 'Recurso Encounter con clase EMERGENCY → FHIR.'
+    };
+    document.getElementById('modal-ok-title').textContent = titulos[tipo];
+    document.getElementById('modal-ok-sub').textContent = subs[tipo];
+    document.getElementById('modal-ok').classList.add('open');
+  }
+
+  // ── HELPERS ──
+  function getNombre(p) {
+    const n = p?.name?.[0];
+    if (!n) return 'Sin nombre';
+    return `${(n.given||[]).join(' ')} ${n.family||''}`.trim();
+  }
+  function getCC(p) {
+    const ids = p?.identifier || [];
+    const reg = ids.find(i => i.system?.includes('registraduria'));
+    return reg?.value || ids[0]?.value || '—';
+  }
+  function calcularEdad(fecha) {
+    const hoy = new Date();
+    const nac = new Date(fecha);
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    const m = hoy.getMonth() - nac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+    return edad;
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) {
+      if (e.target === m) m.classList.remove('open');
+    });
+  });
+
+  // ── DATE PICKER LOGIC ──
+  const MESES = [
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  ];
+
+  function buildDatePicker(hiddenId, minYear, maxYear, defaultToday) {
+    const hoy = new Date();
+    const container = document.createElement('div');
+    container.className = 'date-picker';
+
+    // Day
+    const selDay = document.createElement('select');
+    selDay.className = 'dp-day';
+    selDay.innerHTML = '<option value="">Día</option>';
+    for (let d = 1; d <= 31; d++) {
+      selDay.innerHTML += `<option value="${String(d).padStart(2,'0')}">${d}</option>`;
+    }
+
+    // Month
+    const selMes = document.createElement('select');
+    selMes.className = 'dp-mes';
+    selMes.innerHTML = '<option value="">Mes</option>';
+    MESES.forEach((m, i) => {
+      selMes.innerHTML += `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`;
+    });
+
+    // Year
+    const selAnio = document.createElement('select');
+    selAnio.className = 'dp-anio';
+    selAnio.innerHTML = '<option value="">Año</option>';
+    for (let y = maxYear; y >= minYear; y--) {
+      selAnio.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+
+    // Hidden input for FHIR value
+    const hidden = document.getElementById(hiddenId);
+
+    function updateDays() {
+      const mes  = parseInt(selMes.value)  || 0;
+      const anio = parseInt(selAnio.value) || new Date().getFullYear();
+      const diasEnMes = mes ? new Date(anio, mes, 0).getDate() : 31;
+      const curDay = selDay.value;
+      selDay.innerHTML = '<option value="">Día</option>';
+      for (let d = 1; d <= diasEnMes; d++) {
+        const v = String(d).padStart(2,'0');
+        selDay.innerHTML += `<option value="${v}"${v===curDay?' selected':''}>${d}</option>`;
+      }
+    }
+
+    function updateHidden() {
+      const d = selDay.value, m = selMes.value, y = selAnio.value;
+      hidden.value = (d && m && y) ? `${y}-${m}-${d}` : '';
+    }
+
+    selMes.addEventListener('change',  () => { updateDays(); updateHidden(); });
+    selAnio.addEventListener('change', () => { updateDays(); updateHidden(); });
+    selDay.addEventListener('change',  updateHidden);
+
+    if (defaultToday) {
+      selAnio.value = String(hoy.getFullYear());
+      selMes.value  = String(hoy.getMonth()+1).padStart(2,'0');
+      updateDays();
+      selDay.value  = String(hoy.getDate()).padStart(2,'0');
+      updateHidden();
+    }
+
+    container.appendChild(selDay);
+    container.appendChild(selMes);
+    container.appendChild(selAnio);
+    return container;
+  }
+
+  function initDatePickers() {
+    // Fecha nacimiento — nuevo paciente sin HC (np-nac) — años 1920-hoy
+    const npNacEl = document.getElementById('np-nac');
+    if (npNacEl) {
+      const picker = buildDatePicker('np-nac', 1920, new Date().getFullYear(), false);
+      npNacEl.parentNode.insertBefore(picker, npNacEl);
+      npNacEl.style.display = 'none';
+    }
+
+    // Fecha nacimiento — recién nacido (fecha-nac) — años hoy-hoy (solo año actual)
+    const fechaNacEl = document.getElementById('fecha-nac');
+    if (fechaNacEl) {
+      const picker = buildDatePicker('fecha-nac', new Date().getFullYear()-1, new Date().getFullYear(), true);
+      fechaNacEl.parentNode.insertBefore(picker, fechaNacEl);
+      fechaNacEl.style.display = 'none';
+    }
+
+    // Fecha de consulta — visita (sin id, usamos data attr) — solo año actual y anterior
+    const visitaFecha = document.querySelector('input[type="date"]:not(#np-nac):not(#fecha-nac)');
+    if (visitaFecha) {
+      visitaFecha.id = 'v-fecha-consulta';
+      const picker = buildDatePicker('v-fecha-consulta', new Date().getFullYear()-1, new Date().getFullYear(), true);
+      visitaFecha.parentNode.insertBefore(picker, visitaFecha);
+      visitaFecha.style.display = 'none';
+    }
+  }
+
+</script>
+
+  function showPage(p) {
+    document.querySelectorAll('.main').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + p).classList.add('active');
+    const navLinks = document.querySelectorAll('nav a');
+    const pageIndex = { dashboard: 0, pacientes: 1, nuevo: 2, ideas: 3 };
+    navLinks[pageIndex[p]].classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function setTipo(tipo) {
+    ['rn','cx','urg'].forEach(t => {
+      document.getElementById('form-' + t).style.display = 'none';
+      document.getElementById('btn-' + t).className = 'btn btn-secondary';
+    });
+    document.getElementById('form-' + tipo).style.display = 'block';
+    document.getElementById('btn-' + tipo).className = 'btn btn-primary';
+  }
+
+
+</body>
+</html>
